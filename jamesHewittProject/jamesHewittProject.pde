@@ -1,41 +1,41 @@
-import processing.video.Capture;
-
+import processing.video.*;
+ 
 Capture video;
-
+ 
 PImage prevFrame;
  
 float threshold = 50;
 
 float avgX, avgY;
-
+ 
 void setup() {
   size(600,400);
   video = new Capture(this, 640, 480,30);
   video.start();
   ps = new ParticleSystem(new PVector(width/2, 50));
   prevFrame = createImage(video.width, video.height, RGB);
+  minim = new Minim(this);
+  player = minim.loadFile("sandstorm.mp3", 2048);
+  player.play();
 }
-
+ 
 void captureEvent(Capture video) {
   prevFrame.copy(video, 0, 0, video.width, video.height, 0, 0, video.width, video.height);
   prevFrame.updatePixels();
   video.read();
 }
-
+ 
 void draw() {
   background(0);
   image(video, 0, 0);
-  ps.addParticle();
-  ps.run();
   loadPixels();
   video.loadPixels();
   prevFrame.loadPixels();
-}
-
+ 
   float sumX = 0;
   float sumY = 0;
   int motionCount = 0;
-  
+ 
   for (int x = 0; x < video.width; x++ ) {
     for (int y = 0; y < video.height; y++ ) {
       color current = video.pixels[x+y*video.width];
@@ -58,28 +58,32 @@ void draw() {
       }
     }
   }
+ 
   avgX = sumX / motionCount;
   avgY = sumY / motionCount;
+  
+  ps.addParticle(new PVector(avgX, avgY));
+  ps.run();
  
  
   smooth();
   noStroke();
-  }
-  
-  
+}
+ 
   ParticleSystem ps;
-  
-  class ParticleSystem {
+ 
+ 
+class ParticleSystem {
   ArrayList<Particle> particles;
   PVector origin;
-  
+ 
   ParticleSystem(PVector position) {
     origin = position.copy();
     particles = new ArrayList<Particle>();
   }
  
-  void addParticle() {
-    particles.add(new Particle(origin));
+  void addParticle(PVector pos) {
+    particles.add(new Particle(pos));
   }
  
   void run() {
@@ -92,13 +96,13 @@ void draw() {
     }
   }
 }
-
- class Particle {
+ 
+class Particle {
   PVector position;
   PVector velocity;
   PVector acceleration;
   float lifespan;
-  
+ 
   Particle(PVector l) {
     acceleration = new PVector(0, 0.05);
     velocity = new PVector(random(-1, 1), random(-2, 0));
@@ -120,5 +124,14 @@ void draw() {
   void display() {
     stroke(255, lifespan);
     fill(255, lifespan);
-    ellipse(avgX, avgY, 8, 8);
+    ellipse(position.x, position.y, 8, 8);
   }
+ 
+  boolean isDead() {
+    if (lifespan < 0.0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
