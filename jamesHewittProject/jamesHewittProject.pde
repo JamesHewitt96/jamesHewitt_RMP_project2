@@ -12,15 +12,22 @@ void setup() {
   size(600,400);
   video = new Capture(this, 640, 480,30);
   video.start();
+  ps = new ParticleSystem(new PVector(width/2, 50));
+  prevFrame = createImage(video.width, video.height, RGB);
 }
 
 void captureEvent(Capture video) {
+  prevFrame.copy(video, 0, 0, video.width, video.height, 0, 0, video.width, video.height);
+  prevFrame.updatePixels();
   video.read();
 }
 
 void draw() {
   background(0);
   image(video, 0, 0);
+  ps.addParticle();
+  ps.run();
+  loadPixels();
   video.loadPixels();
   prevFrame.loadPixels();
 }
@@ -57,3 +64,12 @@ void draw() {
  
   smooth();
   noStroke();
+  }
+  
+  
+  ParticleSystem ps;
+  
+  class ParticleSystem {
+  ArrayList<Particle> particles;
+  PVector origin;
+ 
