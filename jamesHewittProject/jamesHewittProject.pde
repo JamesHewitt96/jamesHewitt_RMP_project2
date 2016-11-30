@@ -28,3 +28,32 @@ void draw() {
   float sumX = 0;
   float sumY = 0;
   int motionCount = 0;
+  
+  for (int x = 0; x < video.width; x++ ) {
+    for (int y = 0; y < video.height; y++ ) {
+      color current = video.pixels[x+y*video.width];
+ 
+      color previous = prevFrame.pixels[x+y*video.width];
+ 
+      float r1 = red(current);
+      float g1 = green(current);
+      float b1 = blue(current);
+      float r2 = red(previous); 
+      float g2 = green(previous);
+      float b2 = blue(previous);
+ 
+      float diff = dist(r1, g1, b1, r2, g2, b2);
+ 
+      if (diff > threshold){
+        sumX += x;
+        sumY += y;
+        motionCount ++;
+      }
+    }
+  }
+  avgX = sumX / motionCount;
+  avgY = sumY / motionCount;
+ 
+ 
+  smooth();
+  noStroke();
